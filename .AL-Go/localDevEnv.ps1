@@ -102,9 +102,9 @@
 #>
 
 Param(
-    [string] $containerName = "",
+    [string] $containerName = "bccontainer",
     [ValidateSet("UserPassword", "Windows")]
-    [string] $auth = "",
+    [string] $auth = "UserPassword",
     [pscredential] $credential = $null,
     [string] $licenseFileUrl = "",
     [switch] $fromVSCode,
@@ -140,9 +140,9 @@ function DownloadHelperFile {
 }
 
 try {
-Clear-Host
-Write-Host
-Write-Host -ForegroundColor Yellow @'
+    Clear-Host
+    Write-Host
+    Write-Host -ForegroundColor Yellow @'
   _                     _   _____             ______
  | |                   | | |  __ \           |  ____|
  | |     ___   ___ __ _| | | |  | | _____   __ |__   _ ____   __
@@ -152,24 +152,24 @@ Write-Host -ForegroundColor Yellow @'
 
 '@
 
-$tmpFolder = Join-Path ([System.IO.Path]::GetTempPath()) "$([Guid]::NewGuid().ToString())"
-New-Item -Path $tmpFolder -ItemType Directory -Force | Out-Null
-$GitHubHelperPath = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/Github-Helper.psm1' -folder $tmpFolder -notifyAuthenticatedAttempt
-$ReadSettingsModule = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/ReadSettings.psm1' -folder $tmpFolder
-$debugLoggingModule = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/DebugLogHelper.psm1' -folder $tmpFolder
-$ALGoHelperPath = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/AL-Go-Helper.ps1' -folder $tmpFolder
-DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/settings.schema.json' -folder $tmpFolder | Out-Null
-DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/Environment.Packages.proj' -folder $tmpFolder | Out-Null
+    $tmpFolder = Join-Path ([System.IO.Path]::GetTempPath()) "$([Guid]::NewGuid().ToString())"
+    New-Item -Path $tmpFolder -ItemType Directory -Force | Out-Null
+    $GitHubHelperPath = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/Github-Helper.psm1' -folder $tmpFolder -notifyAuthenticatedAttempt
+    $ReadSettingsModule = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/ReadSettings.psm1' -folder $tmpFolder
+    $debugLoggingModule = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/DebugLogHelper.psm1' -folder $tmpFolder
+    $ALGoHelperPath = DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/AL-Go-Helper.ps1' -folder $tmpFolder
+    DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/settings.schema.json' -folder $tmpFolder | Out-Null
+    DownloadHelperFile -url 'https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/Environment.Packages.proj' -folder $tmpFolder | Out-Null
 
-Import-Module $GitHubHelperPath
-Import-Module $ReadSettingsModule
-Import-Module $debugLoggingModule
-. $ALGoHelperPath -local
+    Import-Module $GitHubHelperPath
+    Import-Module $ReadSettingsModule
+    Import-Module $debugLoggingModule
+    . $ALGoHelperPath -local
 
-$baseFolder = GetBaseFolder -folder $PSScriptRoot
-$project = GetProject -baseFolder $baseFolder -projectALGoFolder $PSScriptRoot
+    $baseFolder = GetBaseFolder -folder $PSScriptRoot
+    $project = GetProject -baseFolder $baseFolder -projectALGoFolder $PSScriptRoot
 
-Write-Host @'
+    Write-Host @'
 
 This script will create a docker based local development environment for your project.
 
@@ -181,86 +181,86 @@ The script will also modify launch.json to have a Local Sandbox configuration po
 
 '@
 
-$settings = ReadSettings -baseFolder $baseFolder -project $project -userName $env:USERNAME -workflowName 'localDevEnv'
+    $settings = ReadSettings -baseFolder $baseFolder -project $project -userName $env:USERNAME -workflowName 'localDevEnv'
 
-Write-Host "Checking System Requirements"
-$dockerProcess = (Get-Process "dockerd" -ErrorAction Ignore)
-if (!($dockerProcess)) {
-    Write-Host -ForegroundColor Red "Dockerd process not found. Docker might not be started, not installed or not running Windows Containers."
-}
-if ($settings.keyVaultName) {
-    if (-not (Get-Module -ListAvailable -Name 'Az.KeyVault')) {
-        Write-Host -ForegroundColor Red "A keyvault name is defined in Settings, you need to have the Az.KeyVault PowerShell module installed (use Install-Module az) or you can set the keyVaultName to an empty string in the user settings file ($($ENV:UserName).settings.json)."
+    Write-Host "Checking System Requirements"
+    $dockerProcess = (Get-Process "dockerd" -ErrorAction Ignore)
+    if (!($dockerProcess)) {
+        Write-Host -ForegroundColor Red "Dockerd process not found. Docker might not be started, not installed or not running Windows Containers."
     }
-}
-
-Write-Host
-
-if (-not $containerName) {
-    $containerName = Enter-Value `
-        -title "Container name" `
-        -question "Please enter the name of the container to create" `
-        -default "bcserver" `
-        -trimCharacters @('"',"'",' ')
-}
-
-if (-not $auth) {
-    $auth = Select-Value `
-        -title "Authentication mechanism for container" `
-        -options @{ "Windows" = "Windows Authentication"; "UserPassword" = "Username/Password authentication" } `
-        -question "Select authentication mechanism for container" `
-        -default "UserPassword"
-}
-
-if (-not $credential) {
-    if ($auth -eq "Windows") {
-        $credential = Get-Credential -Message "Please enter your Windows Credentials" -UserName $env:USERNAME
-        $CurrentDomain = "LDAP://" + ([ADSI]"").distinguishedName
-        $domain = New-Object System.DirectoryServices.DirectoryEntry($CurrentDomain,$credential.UserName,$credential.GetNetworkCredential().password)
-        if ($null -eq $domain.name) {
-            Write-Host -ForegroundColor Red "Unable to verify your Windows Credentials, you might not be able to authenticate to your container"
+    if ($settings.keyVaultName) {
+        if (-not (Get-Module -ListAvailable -Name 'Az.KeyVault')) {
+            Write-Host -ForegroundColor Red "A keyvault name is defined in Settings, you need to have the Az.KeyVault PowerShell module installed (use Install-Module az) or you can set the keyVaultName to an empty string in the user settings file ($($ENV:UserName).settings.json)."
         }
     }
-    else {
-        $credential = Get-Credential -Message "Please enter username and password for your container" -UserName "admin"
-    }
-}
 
-if (-not $licenseFileUrl) {
-    if ($settings.type -eq "AppSource App") {
-        $description = "When developing AppSource Apps for Business Central versions prior to 22, your local development environment needs the developer licensefile with permissions to your AppSource app object IDs"
-        $default = "none"
-    }
-    else {
-        $description = "When developing PTEs, you can optionally specify a developer licensefile with permissions to object IDs of your dependant apps"
-        $default = "none"
+    Write-Host
+
+    if (-not $containerName) {
+        $containerName = Enter-Value `
+            -title "Container name" `
+            -question "Please enter the name of the container to create" `
+            -default "bcserver" `
+            -trimCharacters @('"', "'", ' ')
     }
 
-    $licenseFileUrl = Enter-Value `
-        -title "LicenseFileUrl" `
-        -description $description `
-        -question "Local path or a secure download URL to license file " `
-        -default $default `
-        -doNotConvertToLower `
-        -trimCharacters @('"',"'",' ')
-}
+    if (-not $auth) {
+        $auth = Select-Value `
+            -title "Authentication mechanism for container" `
+            -options @{ "Windows" = "Windows Authentication"; "UserPassword" = "Username/Password authentication" } `
+            -question "Select authentication mechanism for container" `
+            -default "UserPassword"
+    }
 
-if ($licenseFileUrl -eq "none") {
-    $licenseFileUrl = ""
-}
+    if (-not $credential) {
+        if ($auth -eq "Windows") {
+            $credential = Get-Credential -Message "Please enter your Windows Credentials" -UserName $env:USERNAME
+            $CurrentDomain = "LDAP://" + ([ADSI]"").distinguishedName
+            $domain = New-Object System.DirectoryServices.DirectoryEntry($CurrentDomain, $credential.UserName, $credential.GetNetworkCredential().password)
+            if ($null -eq $domain.name) {
+                Write-Host -ForegroundColor Red "Unable to verify your Windows Credentials, you might not be able to authenticate to your container"
+            }
+        }
+        else {
+            $credential = Get-Credential -Message "Please enter username and password for your container" -UserName "admin"
+        }
+    }
 
-CreateDevEnv `
-    -kind local `
-    -caller local `
-    -containerName $containerName `
-    -baseFolder $baseFolder `
-    -project $project `
-    -auth $auth `
-    -credential $credential `
-    -licenseFileUrl $licenseFileUrl `
-    -accept_insiderEula:$accept_insiderEula `
-    -clean:$clean `
-    -customSettings $customSettings
+    if (-not $licenseFileUrl) {
+        if ($settings.type -eq "AppSource App") {
+            $description = "When developing AppSource Apps for Business Central versions prior to 22, your local development environment needs the developer licensefile with permissions to your AppSource app object IDs"
+            $default = "none"
+        }
+        else {
+            $description = "When developing PTEs, you can optionally specify a developer licensefile with permissions to object IDs of your dependant apps"
+            $default = "none"
+        }
+
+        $licenseFileUrl = Enter-Value `
+            -title "LicenseFileUrl" `
+            -description $description `
+            -question "Local path or a secure download URL to license file " `
+            -default $default `
+            -doNotConvertToLower `
+            -trimCharacters @('"', "'", ' ')
+    }
+
+    if ($licenseFileUrl -eq "none") {
+        $licenseFileUrl = ""
+    }
+
+    CreateDevEnv `
+        -kind local `
+        -caller local `
+        -containerName $containerName `
+        -baseFolder $baseFolder `
+        -project $project `
+        -auth $auth `
+        -credential $credential `
+        -licenseFileUrl $licenseFileUrl `
+        -accept_insiderEula:$accept_insiderEula `
+        -clean:$clean `
+        -customSettings $customSettings
 }
 catch {
     Write-Host -ForegroundColor Red "Error: $($_.Exception.Message)`nStacktrace: $($_.scriptStackTrace)"

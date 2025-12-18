@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v8.1/.Modules/settings.schema.json",
+  "memoryLimit": "4GB",
+  "notes": "Example repo-level settings. To use as GitHub repository variable, add this JSON to the repository variable ALGoRepoSettings or copy its contents into the repo variable in Settings > Variables."
+}
