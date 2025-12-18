@@ -1,0 +1,4 @@
+{
+  // Align VS Code AL Test Runner coverage path with TestPractice.Test/.altestrunner/config.json
+  "al-test-runner.codeCoveragePath": ".altestrunner/codecoverage.json"
+}

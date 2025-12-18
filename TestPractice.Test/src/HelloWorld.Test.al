@@ -2,6 +2,7 @@ codeunit 99000 "HelloWorld Test"
 {
     Subtype = Test;
 
+
     [Test]
     [HandlerFunctions('HelloWorldMessageHandler')]
     procedure TestHelloWorldMessage()

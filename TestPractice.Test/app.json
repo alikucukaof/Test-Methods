@@ -22,7 +22,14 @@
       "name": "Any",
       "id": "e7320ebb-08b3-4406-b1ec-b4927d3e280b",
       "version": "22.0.0.0"
+    },
+    {
+      "id": "32a5a0b2-15ac-4197-b826-c569ccba6a6a",
+      "name": "TestPractice",
+      "publisher": "AliKucuk",
+      "version": "1.0.0.0"
     }
+
   ],
   "screenshots": [],
   "platform": "1.0.0.0",
@@ -38,7 +45,7 @@
   ],
   "resourceExposurePolicy": {
     "allowDebugging": true,
-    "allowDownloadingSource": false,
-    "includeSourceInSymbolFile": false
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
   }
 }
